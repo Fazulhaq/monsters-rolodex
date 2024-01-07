@@ -1,18 +1,27 @@
-import { useState, useEffect } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import "./App.css";
 import CardList from "./components/card-list/card-list-components";
 import SearchBox from "./components/search-box/search-box-component";
+import { getData } from "./utils/data.utils";
+
+export type Monster = {
+  id: string;
+  name: string;
+  email: string;
+}
 
 const App = () => {
   const [searchField, setSearchField] = useState("");
-  const [monsters, setMonsters] = useState([]);
+  const [monsters, setMonsters] = useState<Monster[]>([]);
   const [title, setTitle] = useState("Monsters Rolodex");
   const [filteredMonsters, setFilteredMonsters] = useState(monsters);
 
   useEffect(() => {
-    fetch("https://jsonplaceholder.typicode.com/users")
-      .then((response) => response.json())
-      .then((users) => setMonsters(users));
+    const fetchUsers = async () => {
+        const users = await getData<Monster[]>("https://jsonplaceholder.typicode.com/users");
+        setMonsters(users);
+    }
+    fetchUsers();
   }, []);
 
   useEffect(() => {
@@ -22,12 +31,12 @@ const App = () => {
     setFilteredMonsters(newfilteredMonsters);
   }, [monsters, searchField]);
 
-  const onChangeSearch = (event) => {
+  const onChangeSearch = (event: ChangeEvent<HTMLInputElement>): void => {
     const searchFieldString = event.target.value.toLowerCase();
     setSearchField(searchFieldString);
   };
 
-  const onChangeTitle = (event) => {
+  const onChangeTitle = (event: ChangeEvent<HTMLInputElement>): void => {
     const searchFieldString = event.target.value.toLowerCase();
     setTitle(searchFieldString);
   };
@@ -38,13 +47,11 @@ const App = () => {
       <SearchBox
         className="monsters-search-box"
         onChangeHandler={onChangeSearch}
-        placeHolder="search monsters"
       />
       <br />
       <SearchBox
         className="title-box"
         onChangeHandler={onChangeTitle}
-        placeHolder="change title"
       />
       <CardList monsters={filteredMonsters} />
     </div>
